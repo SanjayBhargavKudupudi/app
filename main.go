@@ -7,23 +7,22 @@ import (
 	"log"
 	"net/http"
 
-	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 )
 
 var (
 	oauth2Config = &oauth2.Config{
-		ClientID:     "Expressnest",                      // Replace with your client ID from Keycloak
-		ClientSecret: "JkU6MpovsEFBNZZVTwYtr0sl4tC8milc", // Replace with your client secret from Keycloak
-		RedirectURL:  "http://localhost:3000/",           // Replace with your redirect URI
+		ClientID:     "Expressnest",
+		ClientSecret: "JkU6MpovsEFBNZZVTwYtr0sl4tC8milc",
+		RedirectURL:  "http://localhost:3000/",
 		Scopes:       []string{"openid", "profile", "email"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "http://keycloak-server/auth/realms/Nest/protocol/openid-connect/auth",
 			TokenURL: "http://keycloak-server/auth/realms/Nest/protocol/openid-connect/token",
 		},
 	}
-	// Placeholder for the database connection
+
 	db *sql.DB
 )
 
@@ -42,7 +41,7 @@ func main() {
 }
 
 func setupDB() (*sql.DB, error) {
-	connStr := "postgres://username:0116@localhost/dbname?sslmode=disable"
+	connStr := "postgres://username:0116@localhost/auth?sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
@@ -71,8 +70,8 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Token contains the access and refresh tokens
-	// Handle the tokens appropriately (e.g., create session, store tokens)
-	fmt.Fprintf(w, "Access Token: %s", token.AccessToken) // Placeholder
+
+	fmt.Fprintf(w, "Access Token: %s", token.AccessToken)
 }
 
 func registerUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -83,8 +82,6 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	username := r.FormValue("username")
 	password := r.FormValue("password")
-
-	// Add validation for username and password as per your requirements
 
 	if err := registerUser(db, username, password); err != nil {
 		http.Error(w, "Failed to register user: "+err.Error(), http.StatusInternalServerError)
@@ -100,7 +97,6 @@ func registerUser(db *sql.DB, username, password string) error {
 		return err
 	}
 
-	// Insert user into the database
 	_, err = db.Exec("INSERT INTO users (username, password) VALUES ($1, $2)", username, string(hashedPassword))
 	return err
 }
